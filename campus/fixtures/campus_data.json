@@ -1,0 +1,239 @@
+[
+{
+  "model": "campus.profile",
+  "pk": 1,
+  "fields": {
+    "user": 1,
+    "role": "student"
+  }
+},
+{
+  "model": "campus.department",
+  "pk": 4,
+  "fields": {
+    "name": "Administration",
+    "description": ""
+  }
+},
+{
+  "model": "campus.department",
+  "pk": 5,
+  "fields": {
+    "name": "College of Sciences",
+    "description": ""
+  }
+},
+{
+  "model": "campus.department",
+  "pk": 6,
+  "fields": {
+    "name": "College of Engineering, Architecture and Technology",
+    "description": ""
+  }
+},
+{
+  "model": "campus.department",
+  "pk": 7,
+  "fields": {
+    "name": "College of Business and Accountancy",
+    "description": ""
+  }
+},
+{
+  "model": "campus.department",
+  "pk": 8,
+  "fields": {
+    "name": "College of Arts and Humanities",
+    "description": ""
+  }
+},
+{
+  "model": "campus.department",
+  "pk": 9,
+  "fields": {
+    "name": "College of Hospitality Management and Tourism",
+    "description": ""
+  }
+},
+{
+  "model": "campus.building",
+  "pk": 5,
+  "fields": {
+    "name": "Administration Building",
+    "description": "Central administration and executive offices.",
+    "latitude": "9.776797",
+    "longitude": "118.734173",
+    "image": "",
+    "department": 4
+  }
+},
+{
+  "model": "campus.building",
+  "pk": 6,
+  "fields": {
+    "name": "College of Sciences Building",
+    "description": "Science classrooms and laboratories.",
+    "latitude": "9.778502",
+    "longitude": "118.734596",
+    "image": "",
+    "department": 5
+  }
+},
+{
+  "model": "campus.building",
+  "pk": 7,
+  "fields": {
+    "name": "CEAT Building",
+    "description": "Engineering, Architecture and Technology classrooms and workshops.",
+    "latitude": "9.776879",
+    "longitude": "118.732805",
+    "image": "",
+    "department": 6
+  }
+},
+{
+  "model": "campus.building",
+  "pk": 8,
+  "fields": {
+    "name": "College of Business and Accountancy Building",
+    "description": "Business and accountancy classrooms.",
+    "latitude": "9.777910",
+    "longitude": "118.733089",
+    "image": "",
+    "department": 7
+  }
+},
+{
+  "model": "campus.building",
+  "pk": 9,
+  "fields": {
+    "name": "University Library",
+    "description": "Main campus library and study areas.",
+    "latitude": "9.777191",
+    "longitude": "118.734135",
+    "image": "",
+    "department": null
+  }
+},
+{
+  "model": "campus.room",
+  "pk": 6,
+  "fields": {
+    "name": "Registrar Office",
+    "floor": 1,
+    "room_type": "office",
+    "building": 5,
+    "department": 4
+  }
+},
+{
+  "model": "campus.room",
+  "pk": 7,
+  "fields": {
+    "name": "Cashier",
+    "floor": 1,
+    "room_type": "office",
+    "building": 5,
+    "department": 4
+  }
+},
+{
+  "model": "campus.room",
+  "pk": 8,
+  "fields": {
+    "name": "Science Laboratory 1",
+    "floor": 2,
+    "room_type": "laboratory",
+    "building": 6,
+    "department": 5
+  }
+},
+{
+  "model": "campus.room",
+  "pk": 9,
+  "fields": {
+    "name": "Computer Laboratory 1",
+    "floor": 2,
+    "room_type": "laboratory",
+    "building": 6,
+    "department": 5
+  }
+},
+{
+  "model": "campus.room",
+  "pk": 10,
+  "fields": {
+    "name": "Room 101",
+    "floor": 1,
+    "room_type": "classroom",
+    "building": 7,
+    "department": 6
+  }
+},
+{
+  "model": "campus.room",
+  "pk": 11,
+  "fields": {
+    "name": "Accounting Room",
+    "floor": 1,
+    "room_type": "classroom",
+    "building": 8,
+    "department": 7
+  }
+},
+{
+  "model": "campus.facility",
+  "pk": 4,
+  "fields": {
+    "name": "University Library",
+    "facility_type": "library",
+    "description": "",
+    "is_open": true,
+    "building": 9
+  }
+},
+{
+  "model": "campus.facility",
+  "pk": 5,
+  "fields": {
+    "name": "Clinic",
+    "facility_type": "clinic",
+    "description": "",
+    "is_open": true,
+    "building": 5
+  }
+},
+{
+  "model": "campus.facility",
+  "pk": 6,
+  "fields": {
+    "name": "Canteen",
+    "facility_type": "canteen",
+    "description": "",
+    "is_open": true,
+    "building": 7
+  }
+},
+{
+  "model": "campus.event",
+  "pk": 2,
+  "fields": {
+    "title": "Campus Orientation",
+    "description": "Welcome event for new students.",
+    "date_start": "2026-11-10T14:54:45.555Z",
+    "date_end": "2026-11-10T17:54:45.555Z",
+    "building": 5,
+    "created_by": null
+  }
+},
+{
+  "model": "campus.announcement",
+  "pk": 2,
+  "fields": {
+    "title": "Welcome to CampusConnect",
+    "body": "Use the map to find buildings, offices, and rooms.",
+    "posted_at": "2026-11-07T14:54:45.564Z",
+    "posted_by": null
+  }
+}
+]

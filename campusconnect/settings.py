@@ -140,3 +140,5 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 50,
 }
+
+SECURE_REFERRER_POLICY = 'strict-origin-when-cross-origin'

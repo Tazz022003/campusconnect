@@ -69,4 +69,7 @@ class MaintenanceReportViewSet(BaseViewSet):
 
     def perform_create(self, serializer):
         serializer.save(reported_by=self.request.user)
+
+def map_page(request):
+    return render(request, 'campus/map.html')
 # Create your views here.

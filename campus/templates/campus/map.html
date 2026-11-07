@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CampusConnect Map</title>
+  <meta name="csrf-token" content="{{ csrf_token }}">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: system-ui, sans-serif; display: flex; flex-direction: column; height: 100vh; }
+    header { background: #1e3a5f; color: #fff; padding: 10px 16px; display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+    header h1 { font-size: 1.1rem; margin: 0; }
+    #search { padding: 8px 10px; border-radius: 6px; border: none; min-width: 260px; }
+    .wrap { position: relative; flex: 1; }
+    #map { position: absolute; inset: 0; }
+    #results { position: absolute; top: 10px; right: 10px; z-index: 1000; background: #fff; border-radius: 8px;
+               box-shadow: 0 2px 8px rgba(0,0,0,.3); max-height: 50%; overflow-y: auto; min-width: 240px; display: none; }
+    #results div { padding: 8px 12px; cursor: pointer; border-bottom: 1px solid #eee; font-size: .9rem; }
+    #results div:hover { background: #eef3fa; }
+    #results small { color: #666; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>CampusConnect</h1>
+    <input id="search" type="search" placeholder="Search a room, building or facility..." autocomplete="off">
+  </header>
+
+  <div class="wrap">
+    <div id="map"></div>
+    <div id="results"></div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    // Default view: Palawan State University Main Campus (Tiniguiban Heights, Puerto Princesa)
+    const map = L.map('map').setView([9.77778, 118.73333], 16);
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+
+    const markers = {};   // building id -> marker
+
+    // ---- Edit mode: drag a marker to the right spot and it saves automatically. ----
+    // You must be logged in (e.g. via /admin/) in this browser. Set to false when done.
+    const EDIT_MODE = true;
+
+    async function saveLocation(b, marker) {
+      const { lat, lng } = marker.getLatLng();
+      const csrf = document.querySelector('meta[name="csrf-token"]').content;
+      try {
+        const res = await fetch(`/api/buildings/${b.id}/`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrf },
+          body: JSON.stringify({ latitude: lat.toFixed(6), longitude: lng.toFixed(6) }),
+        });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        marker.setPopupContent(`<strong>${esc(b.name)}</strong><br>Saved: ${lat.toFixed(6)}, ${lng.toFixed(6)}`);
+        marker.openPopup();
+      } catch (err) {
+        alert('Could not save location (' + err.message + '). Make sure you are logged in at /admin/.');
+      }
+    }
+
+    function esc(s) {
+      const d = document.createElement('div');
+      d.textContent = s ?? '';
+      return d.innerHTML;
+    }
+
+    function popupHtml(b) {
+      let html = `<strong>${esc(b.name)}</strong>`;
+      if (b.department_name) html += `<br><small>${esc(b.department_name)}</small>`;
+      if (b.description) html += `<p>${esc(b.description)}</p>`;
+      if (b.image) html += `<img src="${esc(b.image)}" style="max-width:200px;border-radius:6px">`;
+      return html;
+    }
+
+    async function loadBuildings() {
+      const res = await fetch('/api/buildings/');
+      const data = await res.json();
+      const buildings = data.results ?? data;   // works with or without pagination
+
+      const points = [];
+      buildings.forEach(b => {
+        const pos = [parseFloat(b.latitude), parseFloat(b.longitude)];
+        points.push(pos);
+        const marker = L.marker(pos, { draggable: EDIT_MODE }).addTo(map).bindPopup(popupHtml(b));
+        if (EDIT_MODE) marker.on('dragend', () => saveLocation(b, marker));
+        markers[b.id] = marker;
+      });
+      map.invalidateSize();
+      if (points.length) map.fitBounds(points, { padding: [40, 40], maxZoom: 18 });
+    }
+
+    // ---- Room / office search ----
+    const input = document.getElementById('search');
+    const results = document.getElementById('results');
+    let timer;
+
+    input.addEventListener('input', () => {
+      clearTimeout(timer);
+      const q = input.value.trim();
+      if (!q) { results.style.display = 'none'; return; }
+      timer = setTimeout(() => searchRooms(q), 300);   // debounce
+    });
+
+    async function searchRooms(q) {
+      const enc = encodeURIComponent(q);
+      const list = d => d.results ?? d;
+      const [rooms, buildings, facilities] = await Promise.all([
+        fetch('/api/rooms/?search=' + enc).then(r => r.json()).then(list),
+        fetch('/api/buildings/?search=' + enc).then(r => r.json()).then(list),
+        fetch('/api/facilities/?search=' + enc).then(r => r.json()).then(list),
+      ]);
+
+      // Combine everything into one list; each item points to a building marker
+      const items = [
+        ...buildings.map(b => ({ title: b.name, sub: 'Building', buildingId: b.id })),
+        ...rooms.map(r => ({ title: r.name, sub: `${r.building_name} · floor ${r.floor}`, buildingId: r.building })),
+        ...facilities.map(f => ({ title: f.name, sub: `Facility · ${f.building_name}`, buildingId: f.building })),
+      ];
+
+      results.innerHTML = '';
+      if (!items.length) {
+        results.innerHTML = '<div>No results found</div>';
+      }
+      items.forEach(it => {
+        const el = document.createElement('div');
+        el.innerHTML = `${esc(it.title)}<br><small>${esc(it.sub)}</small>`;
+        el.addEventListener('click', () => {
+          const marker = markers[it.buildingId];
+          if (marker) {
+            map.flyTo(marker.getLatLng(), 19);
+            marker.openPopup();
+          }
+          results.style.display = 'none';
+        });
+        results.appendChild(el);
+      });
+      results.style.display = 'block';
+    }
+
+    // ---- Coordinate helper: click anywhere on the map to see its lat/lng. ----
+    // Use it to copy exact building coordinates into the admin. Set to false when done.
+    const SHOW_COORDS_ON_CLICK = true;
+    if (SHOW_COORDS_ON_CLICK) {
+      map.on('click', e => {
+        const lat = e.latlng.lat.toFixed(6);
+        const lng = e.latlng.lng.toFixed(6);
+        L.popup()
+          .setLatLng(e.latlng)
+          .setContent(`<b>Latitude:</b> ${lat}<br><b>Longitude:</b> ${lng}`)
+          .openOn(map);
+      });
+    }
+
+    loadBuildings();
+  </script>
+</body>
+</html>

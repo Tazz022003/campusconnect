@@ -13,5 +13,6 @@ router.register('announcements', views.AnnouncementViewSet)
 router.register('reports', views.MaintenanceReportViewSet)
 
 urlpatterns = [
+    path('', views.map_page, name='map'),
     path('api/', include(router.urls)),
 ]
