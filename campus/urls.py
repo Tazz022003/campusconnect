@@ -14,7 +14,7 @@ router.register('reports', views.MaintenanceReportViewSet)
 
 urlpatterns = [
     path('', dashboard.dashboard_view, name='dashboard'),
-    path('', views.map_page, name='map'),
+    path('map/', views.map_page, name='map'),
     path('api/route/', routing.campus_route, name='route'),
     path('api/', include(router.urls)),
 ]

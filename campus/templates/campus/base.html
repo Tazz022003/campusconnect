@@ -14,9 +14,12 @@
       --page-bg: #f5f6fa;
     }
     body { background: var(--page-bg); }
-    .sidebar { background: var(--sidebar-bg); width: 250px; flex: 0 0 250px; }
+    .sidebar { width: 250px; }
+    .sidebar-inner { background: var(--sidebar-bg); min-height: 100%; }
     @media (min-width: 992px) {
-      .sidebar { position: sticky; top: 0; height: 100vh; overflow-y: auto; }
+      /* Bootstrap forces offcanvas-lg to be transparent/auto-sized on large screens, so override it */
+      .sidebar { position: sticky; top: 0; height: 100vh !important; width: 250px !important;
+                 flex: 0 0 250px !important; overflow-y: auto; }
     }
     .brand { color: #fff; font-weight: 700; font-size: 1.25rem; text-decoration: none; }
     .brand span { color: var(--psu-orange); }
@@ -40,7 +43,7 @@
 
   <!-- Sidebar -->
   <aside class="offcanvas-lg offcanvas-start sidebar" tabindex="-1" id="sidebar">
-    <div class="p-3 d-flex flex-column h-100">
+    <div class="sidebar-inner p-3 d-flex flex-column h-100">
       <div class="d-flex justify-content-between align-items-center mb-3">
         <a href="{% url 'dashboard' %}" class="brand"><i class="bi bi-geo-alt-fill" style="color: var(--psu-orange)"></i> Campus<span>Connect</span></a>
         <button type="button" class="btn-close btn-close-white d-lg-none" data-bs-dismiss="offcanvas" data-bs-target="#sidebar"></button>
