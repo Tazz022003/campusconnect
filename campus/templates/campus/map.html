@@ -19,17 +19,37 @@
     #results div { padding: 8px 12px; cursor: pointer; border-bottom: 1px solid #eee; font-size: .9rem; }
     #results div:hover { background: #eef3fa; }
     #results small { color: #666; }
+    #directions { position: absolute; left: 10px; top: 90px; z-index: 1000; background: #fff; border-radius: 8px;
+                  box-shadow: 0 2px 8px rgba(0,0,0,.3); padding: 10px 12px; width: 250px; font-size: .85rem; }
+    #directions h2 { font-size: .95rem; margin: 0 0 8px; }
+    #directions select { width: 100%; padding: 5px; margin-bottom: 6px; }
+    #directions button { padding: 6px 10px; border: 0; border-radius: 6px; cursor: pointer; }
+    #dir-go { background: #f58220; color: #fff; }
+    #dir-clear { background: #e5e7ee; }
+    #dir-info { margin-top: 8px; font-weight: 600; }
+    #directions small { display: block; color: #777; margin-top: 6px; font-size: .7rem; }
   </style>
 </head>
 <body>
   <header>
     <h1>CampusConnect</h1>
+    <a href="/" style="color:#fff;text-decoration:none;font-size:.9rem">&larr; Dashboard</a>
     <input id="search" type="search" placeholder="Search a room, building or facility..." autocomplete="off">
   </header>
 
   <div class="wrap">
     <div id="map"></div>
     <div id="results"></div>
+
+    <div id="directions">
+      <h2>Walking directions</h2>
+      <select id="dir-from" aria-label="From building"></select>
+      <select id="dir-to" aria-label="To building"></select>
+      <button id="dir-go" type="button">Get directions</button>
+      <button id="dir-clear" type="button">Clear</button>
+      <div id="dir-info"></div>
+      <small>Routing by OSRM (FOSSGIS) &middot; &copy; OpenStreetMap contributors</small>
+    </div>
   </div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -82,6 +102,8 @@
       const res = await fetch('/api/buildings/');
       const data = await res.json();
       const buildings = data.results ?? data;   // works with or without pagination
+
+      fillDirectionSelects(buildings);
 
       const points = [];
       buildings.forEach(b => {
@@ -157,7 +179,56 @@
       });
     }
 
+    // ---- Walking directions (external routing API via /api/route/) ----
+    const fromSel = document.getElementById('dir-from');
+    const toSel = document.getElementById('dir-to');
+    const dirInfo = document.getElementById('dir-info');
+    let routeLayer = null;
+
+    function fillDirectionSelects(buildings) {
+      [fromSel, toSel].forEach(sel => {
+        sel.innerHTML = '';
+        buildings.forEach(b => {
+          const opt = document.createElement('option');
+          opt.value = b.id;
+          opt.textContent = b.name;
+          sel.appendChild(opt);
+        });
+      });
+      if (buildings.length > 1) toSel.selectedIndex = 1;   // default: two different buildings
+    }
+
+    function clearRoute() {
+      if (routeLayer) { map.removeLayer(routeLayer); routeLayer = null; }
+      dirInfo.textContent = '';
+    }
+
+    async function getDirections() {
+      clearRoute();
+      dirInfo.textContent = 'Finding route...';
+      try {
+        const res = await fetch(
+          `/api/route/?from=${encodeURIComponent(fromSel.value)}&to=${encodeURIComponent(toSel.value)}`
+        );
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Route unavailable');
+
+        routeLayer = L.geoJSON(data.geometry, {
+          style: { color: '#f58220', weight: 6, opacity: 0.9 },
+        }).addTo(map);
+        map.fitBounds(routeLayer.getBounds(), { padding: [60, 60] });
+
+        const mins = Math.max(1, Math.round(data.duration / 60));
+        dirInfo.textContent = `${data.distance} m \u00B7 about ${mins} min walk`;
+      } catch (err) {
+        dirInfo.textContent = err.message;
+      }
+    }
+
+    document.getElementById('dir-go').addEventListener('click', getDirections);
+    document.getElementById('dir-clear').addEventListener('click', clearRoute);
+
     loadBuildings();
   </script>
 </body>
-</html> 
+</html>
