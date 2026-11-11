@@ -10,6 +10,7 @@ Students can find school buildings, offices, laboratories, and facilities on an 
 
 -   CHARS GERAND P. ALMOCERA
 -   ARIEL JOHN CORDOVEZ
+-   DAVE LUMANOG
 
 ## Features
 
@@ -159,3 +160,4 @@ campusconnect/
 - Map data &copy; [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors
 - Walking routes by [OSRM](https://project-osrm.org/) (FOSSGIS routing server)
 - [Leaflet](https://leafletjs.com/), [Bootstrap](https://getbootstrap.com/), [Django](https://www.djangoproject.com/)
+
