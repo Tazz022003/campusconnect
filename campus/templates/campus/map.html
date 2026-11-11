@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,29 +7,7 @@
   <title>CampusConnect Map</title>
   <meta name="csrf-token" content="{{ csrf_token }}">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-  <style>
-    * { box-sizing: border-box; }
-    body { margin: 0; font-family: system-ui, sans-serif; display: flex; flex-direction: column; height: 100vh; }
-    header { background: #1e3a5f; color: #fff; padding: 10px 16px; display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
-    header h1 { font-size: 1.1rem; margin: 0; }
-    #search { padding: 8px 10px; border-radius: 6px; border: none; min-width: 260px; }
-    .wrap { position: relative; flex: 1; }
-    #map { position: absolute; inset: 0; }
-    #results { position: absolute; top: 10px; right: 10px; z-index: 1000; background: #fff; border-radius: 8px;
-               box-shadow: 0 2px 8px rgba(0,0,0,.3); max-height: 50%; overflow-y: auto; min-width: 240px; display: none; }
-    #results div { padding: 8px 12px; cursor: pointer; border-bottom: 1px solid #eee; font-size: .9rem; }
-    #results div:hover { background: #eef3fa; }
-    #results small { color: #666; }
-    #directions { position: absolute; left: 10px; top: 90px; z-index: 1000; background: #fff; border-radius: 8px;
-                  box-shadow: 0 2px 8px rgba(0,0,0,.3); padding: 10px 12px; width: 250px; font-size: .85rem; }
-    #directions h2 { font-size: .95rem; margin: 0 0 8px; }
-    #directions select { width: 100%; padding: 5px; margin-bottom: 6px; }
-    #directions button { padding: 6px 10px; border: 0; border-radius: 6px; cursor: pointer; }
-    #dir-go { background: #f58220; color: #fff; }
-    #dir-clear { background: #e5e7ee; }
-    #dir-info { margin-top: 8px; font-weight: 600; }
-    #directions small { display: block; color: #777; margin-top: 6px; font-size: .7rem; }
-  </style>
+  <link rel="stylesheet" href="{% static 'campus/css/map.css' %}">
 </head>
 <body>
   <header>
@@ -58,6 +37,7 @@
     const map = L.map('map').setView([9.77778, 118.73333], 16);
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
+      referrerPolicy: 'strict-origin-when-cross-origin',
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(map);
 
