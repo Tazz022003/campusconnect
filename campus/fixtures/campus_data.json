@@ -1,13 +1,5 @@
 [
 {
-  "model": "campus.profile",
-  "pk": 1,
-  "fields": {
-    "user": 1,
-    "role": "student"
-  }
-},
-{
   "model": "campus.department",
   "pk": 4,
   "fields": {
