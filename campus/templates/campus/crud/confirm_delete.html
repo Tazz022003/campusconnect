@@ -1,0 +1,24 @@
+{% extends 'campus/base.html' %}
+
+{% block title %}Delete {{ singular }} - CampusConnect{% endblock %}
+{% block heading %}Delete {{ singular }}{% endblock %}
+
+{% block content %}
+<div class="card border-danger" style="max-width: 640px;">
+  <div class="card-header text-danger"><i class="bi bi-exclamation-triangle"></i> Confirm delete</div>
+  <div class="card-body">
+    <p class="mb-1">Are you sure you want to delete this {{ singular|lower }}?</p>
+    <p class="fw-semibold fs-5">{{ object }}</p>
+    <p class="text-muted small">
+      This cannot be undone. Anything linked to it (for example the rooms, facilities,
+      or events inside a building) may be deleted too.
+    </p>
+
+    <form method="post" class="d-flex gap-2">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-danger"><i class="bi bi-trash"></i> Yes, delete</button>
+      <a href="{% url list_url %}" class="btn btn-outline-secondary">Cancel</a>
+    </form>
+  </div>
+</div>
+{% endblock %}

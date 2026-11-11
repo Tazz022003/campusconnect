@@ -1,7 +1,8 @@
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
-from . import dashboard, routing, views
 
+from . import dashboard, routing, views
+from .crud import crud_urlpatterns
 
 router = DefaultRouter()
 router.register('departments', views.DepartmentViewSet)
@@ -17,4 +18,4 @@ urlpatterns = [
     path('map/', views.map_page, name='map'),
     path('api/route/', routing.campus_route, name='route'),
     path('api/', include(router.urls)),
-]
+] + crud_urlpatterns

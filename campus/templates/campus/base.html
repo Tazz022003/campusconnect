@@ -54,15 +54,15 @@
         <a class="nav-link {% if request.resolver_match.url_name == 'map' %}active{% endif %}" href="{% url 'map' %}"><i class="bi bi-map"></i> Campus Map</a>
 
         <div class="nav-section">Manage</div>
-        <a class="nav-link" href="{% url 'admin:campus_building_changelist' %}"><i class="bi bi-building"></i> Buildings</a>
-        <a class="nav-link" href="{% url 'admin:campus_room_changelist' %}"><i class="bi bi-door-open"></i> Rooms</a>
-        <a class="nav-link" href="{% url 'admin:campus_department_changelist' %}"><i class="bi bi-diagram-3"></i> Departments</a>
-        <a class="nav-link" href="{% url 'admin:campus_facility_changelist' %}"><i class="bi bi-hospital"></i> Facilities</a>
+        <a class="nav-link {% if 'building' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'building_list' %}"><i class="bi bi-building"></i> Buildings</a>
+        <a class="nav-link {% if 'room' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'room_list' %}"><i class="bi bi-door-open"></i> Rooms</a>
+        <a class="nav-link {% if 'department' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'department_list' %}"><i class="bi bi-diagram-3"></i> Departments</a>
+        <a class="nav-link {% if 'facility' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'facility_list' %}"><i class="bi bi-hospital"></i> Facilities</a>
 
         <div class="nav-section">Community</div>
-        <a class="nav-link" href="{% url 'admin:campus_event_changelist' %}"><i class="bi bi-calendar-event"></i> Events</a>
-        <a class="nav-link" href="{% url 'admin:campus_announcement_changelist' %}"><i class="bi bi-megaphone"></i> Announcements</a>
-        <a class="nav-link" href="{% url 'admin:campus_maintenancereport_changelist' %}"><i class="bi bi-tools"></i> Maintenance Reports</a>
+        <a class="nav-link {% if 'event' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'event_list' %}"><i class="bi bi-calendar-event"></i> Events</a>
+        <a class="nav-link {% if 'announcement' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'announcement_list' %}"><i class="bi bi-megaphone"></i> Announcements</a>
+        <a class="nav-link {% if 'report' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'report_list' %}"><i class="bi bi-tools"></i> Maintenance Reports</a>
 
         <div class="nav-section">Developers</div>
         <a class="nav-link" href="/api/" target="_blank"><i class="bi bi-braces"></i> REST API</a>
@@ -93,6 +93,12 @@
     </header>
 
     <main class="p-3 p-lg-4">
+      {% for message in messages %}
+        <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags|default:'info' }}{% endif %} alert-dismissible fade show" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      {% endfor %}
       {% block content %}{% endblock %}
     </main>
   </div>

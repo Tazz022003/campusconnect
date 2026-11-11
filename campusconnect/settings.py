@@ -142,3 +142,5 @@ REST_FRAMEWORK = {
 }
 
 SECURE_REFERRER_POLICY = 'strict-origin-when-cross-origin'
+
+LOGIN_URL = 'admin:login'
