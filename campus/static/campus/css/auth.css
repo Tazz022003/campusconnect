@@ -1,0 +1,58 @@
+/* CampusConnect - login and register pages */
+
+:root {
+  --psu-orange: #f58220;
+  --psu-orange-dark: #d96b0b;
+  --sidebar-bg: #1f2430;
+}
+
+.auth-body {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: linear-gradient(135deg, var(--sidebar-bg) 0%, #2d3446 60%, var(--psu-orange) 160%);
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 440px;
+  border: 0;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, .35);
+}
+
+.auth-logo {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--sidebar-bg);
+}
+
+.auth-logo i,
+.auth-logo span {
+  color: var(--psu-orange);
+}
+
+.btn-psu {
+  background: var(--psu-orange);
+  border-color: var(--psu-orange);
+  color: #fff;
+}
+
+.btn-psu:hover {
+  background: var(--psu-orange-dark);
+  border-color: var(--psu-orange-dark);
+  color: #fff;
+}
+
+.auth-card a {
+  color: var(--psu-orange-dark);
+}
+
+.auth-card .helptext,
+.auth-card .form-text ul {
+  font-size: .8rem;
+  color: #6c757d;
+  padding-left: 1.1rem;
+  margin-bottom: 0;
+}
