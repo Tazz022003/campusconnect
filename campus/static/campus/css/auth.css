@@ -56,3 +56,8 @@
   padding-left: 1.1rem;
   margin-bottom: 0;
 }
+
+/* the register page is wider so fields can sit side by side (less scrolling) */
+.auth-card.auth-card-wide {
+  max-width: 560px;
+}

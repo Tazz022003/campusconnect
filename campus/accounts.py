@@ -1,3 +1,6 @@
+import re
+
+from django import forms
 from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
@@ -23,19 +26,67 @@ def style_fields(form):
 # Login and register
 # ----------------------------------------------------------------------------
 class StyledAuthenticationForm(AuthenticationForm):
+    """Log in with your email (or your username)."""
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         style_fields(self)
+        self.fields['username'].label = 'Email or username'
+        self.fields['username'].widget.attrs['placeholder'] = 'you@example.com'
+
+    def clean(self):
+        identifier = self.cleaned_data.get('username', '')
+        if '@' in identifier:
+            # swap the email for the matching username, then let Django check the password
+            match = User.objects.filter(email__iexact=identifier).first()
+            if match:
+                self.cleaned_data['username'] = match.username
+        return super().clean()
+
+
+def make_username(email):
+    """Build a unique username from the email, e.g. juan@gmail.com -> juan (or juan2 if taken)."""
+    base = re.sub(r'[^\w.+-]', '', email.split('@')[0])[:140] or 'user'
+    username, n = base, 1
+    while User.objects.filter(username__iexact=username).exists():
+        n += 1
+        username = f'{base}{n}'
+    return username
 
 
 class RegisterForm(UserCreationForm):
+    """No username to think about: it is created from the email automatically."""
+
     class Meta(UserCreationForm.Meta):
         model = User
-        fields = ('username', 'first_name', 'last_name', 'email')
+        fields = ('first_name', 'last_name', 'email')
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         style_fields(self)
+
+        self.fields['first_name'].required = True
+        self.fields['last_name'].required = True
+        self.fields['email'].required = True
+        self.fields['email'].widget.attrs['placeholder'] = 'you@example.com'
+        self.fields['email'].help_text = ''
+        self.fields['password1'].help_text = 'At least 8 characters, not only numbers.'
+        self.fields['password1'].widget.attrs['placeholder'] = 'Password'
+        self.fields['password2'].help_text = ''
+        self.fields['password2'].widget.attrs['placeholder'] = 'Type it again'
+
+    def clean_email(self):
+        email = self.cleaned_data['email'].strip().lower()
+        if User.objects.filter(email__iexact=email).exists():
+            raise forms.ValidationError('An account with this email already exists.')
+        return email
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        user.username = make_username(self.cleaned_data['email'])
+        if commit:
+            user.save()
+        return user
 
 
 class CampusLoginView(LoginView):

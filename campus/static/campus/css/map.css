@@ -1,23 +1,44 @@
-/* CampusConnect - full-screen map page */
+/* CampusConnect - map page (sits inside the normal sidebar layout) */
 
-* { box-sizing: border-box; }
-body { margin: 0; font-family: system-ui, sans-serif; display: flex; flex-direction: column; height: 100vh; }
-header { background: #1e3a5f; color: #fff; padding: 10px 16px; display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
-header h1 { font-size: 1.1rem; margin: 0; }
-#search { padding: 8px 10px; border-radius: 6px; border: none; min-width: 260px; }
-.wrap { position: relative; flex: 1; }
-#map { position: absolute; inset: 0; }
-#results { position: absolute; top: 10px; right: 10px; z-index: 1000; background: #fff; border-radius: 8px;
-           box-shadow: 0 2px 8px rgba(0,0,0,.3); max-height: 50%; overflow-y: auto; min-width: 240px; display: none; }
-#results div { padding: 8px 12px; cursor: pointer; border-bottom: 1px solid #eee; font-size: .9rem; }
-#results div:hover { background: #eef3fa; }
-#results small { color: #666; }
-#directions { position: absolute; left: 10px; top: 90px; z-index: 1000; background: #fff; border-radius: 8px;
-              box-shadow: 0 2px 8px rgba(0,0,0,.3); padding: 10px 12px; width: 250px; font-size: .85rem; }
-#directions h2 { font-size: .95rem; margin: 0 0 8px; }
-#directions select { width: 100%; padding: 5px; margin-bottom: 6px; }
-#directions button { padding: 6px 10px; border: 0; border-radius: 6px; cursor: pointer; }
-#dir-go { background: #f58220; color: #fff; }
-#dir-clear { background: #e5e7ee; }
-#dir-info { margin-top: 8px; font-weight: 600; }
-#directions small { display: block; color: #777; margin-top: 6px; font-size: .7rem; }
+.main-flush .alert { margin: .75rem; }
+
+/* the map fills the whole area under the top bar */
+.map-wrap { position: absolute; inset: 0; }
+#map { position: absolute; inset: 0; z-index: 0; }
+
+/* floating cards on top of the map */
+.map-panel {
+  position: absolute;
+  z-index: 1000;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, .25);
+}
+
+/* search: top-left, next to the zoom buttons */
+#search-panel { top: 12px; left: 58px; width: min(340px, calc(100% - 76px)); }
+#search-panel .input-group { border-radius: 12px; overflow: hidden; }
+#search-panel .form-control:focus { box-shadow: none; }
+#results {
+  position: absolute; top: 100%; left: 0; right: 0; margin-top: 6px;
+  max-height: 50vh; overflow-y: auto;
+  border-radius: 12px; box-shadow: 0 2px 10px rgba(0, 0, 0, .25);
+}
+
+/* walking directions: top-right, can be collapsed */
+#directions { top: 12px; right: 12px; width: 280px; }
+#directions summary {
+  padding: 10px 14px; cursor: pointer; font-weight: 600; list-style: none;
+}
+#directions summary::-webkit-details-marker { display: none; }
+#directions summary::after { content: "\25BE"; float: right; color: #6b7280; }
+#directions[open] summary::after { content: "\25B4"; }
+
+#edit-hint {
+  left: 12px; bottom: 28px; padding: 6px 12px; font-size: .8rem; color: #6b7280;
+}
+
+/* phones: directions panel goes under the search box */
+@media (max-width: 767px) {
+  #directions { top: 64px; left: 12px; right: 12px; width: auto; }
+}

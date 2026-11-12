@@ -1,214 +1,250 @@
+{% extends 'campus/base.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>CampusConnect Map</title>
-  <meta name="csrf-token" content="{{ csrf_token }}">
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-  <link rel="stylesheet" href="{% static 'campus/css/map.css' %}">
-</head>
-<body>
-  <header>
-    <h1>CampusConnect</h1>
-    <a href="/" style="color:#fff;text-decoration:none;font-size:.9rem">&larr; Dashboard</a>
-    <input id="search" type="search" placeholder="Search a room, building or facility..." autocomplete="off">
-  </header>
 
-  <div class="wrap">
-    <div id="map"></div>
-    <div id="results"></div>
+{% block title %}Campus Map - CampusConnect{% endblock %}
+{% block heading %}Campus Map{% endblock %}
+{% block main_class %}p-0 main-flush{% endblock %}
 
-    <div id="directions">
-      <h2>Walking directions</h2>
-      <select id="dir-from" aria-label="From building"></select>
-      <select id="dir-to" aria-label="To building"></select>
-      <button id="dir-go" type="button">Get directions</button>
-      <button id="dir-clear" type="button">Clear</button>
-      <div id="dir-info"></div>
-      <small>Routing by OSRM (FOSSGIS) &middot; &copy; OpenStreetMap contributors</small>
+{% block extra_css %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="stylesheet" href="{% static 'campus/css/map.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="map-wrap">
+  <div id="map"></div>
+
+  <!-- Search -->
+  <div id="search-panel" class="map-panel">
+    <div class="input-group">
+      <span class="input-group-text bg-white border-end-0"><i class="bi bi-search"></i></span>
+      <input id="search" type="search" class="form-control border-start-0"
+             placeholder="Search a room, building or facility..." autocomplete="off">
     </div>
+    <div id="results" class="list-group" hidden></div>
   </div>
 
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script>
-    // Default view: Palawan State University Main Campus (Tiniguiban Heights, Puerto Princesa)
-    const map = L.map('map').setView([9.77778, 118.73333], 16);
-    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19,
-      referrerPolicy: 'strict-origin-when-cross-origin',
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-    }).addTo(map);
+  <!-- Walking directions -->
+  <details id="directions" class="map-panel" open>
+    <summary><i class="bi bi-signpost-split"></i> Walking directions</summary>
+    <div class="px-3 pb-3">
+      <label class="form-label small mb-1" for="dir-from">From</label>
+      <select id="dir-from" class="form-select form-select-sm mb-2"></select>
 
-    const markers = {};   // building id -> marker
+      <label class="form-label small mb-1" for="dir-to">To</label>
+      <select id="dir-to" class="form-select form-select-sm mb-3"></select>
 
-    // ---- Edit mode: drag a marker to the right spot and it saves automatically. ----
-    // You must be logged in (e.g. via /admin/) in this browser. Set to false when done.
-    const EDIT_MODE = true;
+      <div class="d-flex gap-2">
+        <button id="dir-go" type="button" class="btn btn-sm btn-psu flex-grow-1">Get directions</button>
+        <button id="dir-clear" type="button" class="btn btn-sm btn-outline-secondary">Clear</button>
+      </div>
+      <div id="dir-info" class="fw-semibold small mt-2"></div>
+      <div class="text-muted mt-2" style="font-size: .7rem;">
+        Routing by OSRM (FOSSGIS) &middot; &copy; OpenStreetMap contributors
+      </div>
+    </div>
+  </details>
 
-    async function saveLocation(b, marker) {
-      const { lat, lng } = marker.getLatLng();
-      const csrf = document.querySelector('meta[name="csrf-token"]').content;
-      try {
-        const res = await fetch(`/api/buildings/${b.id}/`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrf },
-          body: JSON.stringify({ latitude: lat.toFixed(6), longitude: lng.toFixed(6) }),
-        });
-        if (!res.ok) throw new Error('HTTP ' + res.status);
-        marker.setPopupContent(`<strong>${esc(b.name)}</strong><br>Saved: ${lat.toFixed(6)}, ${lng.toFixed(6)}`);
-        marker.openPopup();
-      } catch (err) {
-        alert('Could not save location (' + err.message + '). Make sure you are logged in at /admin/.');
-      }
-    }
+  <div id="edit-hint" class="map-panel" hidden>
+    <i class="bi bi-pencil-square"></i> Edit mode: drag a pin to move its building
+  </div>
+</div>
+{% endblock %}
 
-    function esc(s) {
-      const d = document.createElement('div');
-      d.textContent = s ?? '';
-      return d.innerHTML;
-    }
+{% block extra_js %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+  // Default view: Palawan State University Main Campus (Tiniguiban Heights, Puerto Princesa)
+  const map = L.map('map').setView([9.77778, 118.73333], 16);
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    referrerPolicy: 'strict-origin-when-cross-origin',
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+  }).addTo(map);
 
-    function popupHtml(b) {
-      let html = `<strong>${esc(b.name)}</strong>`;
-      if (b.department_name) html += `<br><small>${esc(b.department_name)}</small>`;
-      if (b.description) html += `<p>${esc(b.description)}</p>`;
-      if (b.image) html += `<img src="${esc(b.image)}" style="max-width:200px;border-radius:6px">`;
-      return html;
-    }
+  const markers = {};   // building id -> marker
 
-    async function loadBuildings() {
-      const res = await fetch('/api/buildings/');
-      const data = await res.json();
-      const buildings = data.results ?? data;   // works with or without pagination
+  // ---- Edit mode: admins can drag a pin to the right spot and it saves automatically. ----
+  // ALLOW_EDITING is the master switch: set it to false for the final demo.
+  const ALLOW_EDITING = true;
+  const IS_ADMIN = {% if user.is_superuser or user.profile.role == 'admin' %}true{% else %}false{% endif %};
+  const EDIT_MODE = ALLOW_EDITING && IS_ADMIN;
+  const SHOW_COORDS_ON_CLICK = EDIT_MODE;   // click the map to see its latitude/longitude
 
-      fillDirectionSelects(buildings);
+  if (EDIT_MODE) document.getElementById('edit-hint').hidden = false;
 
-      const points = [];
-      buildings.forEach(b => {
-        const pos = [parseFloat(b.latitude), parseFloat(b.longitude)];
-        points.push(pos);
-        const marker = L.marker(pos, { draggable: EDIT_MODE }).addTo(map).bindPopup(popupHtml(b));
-        if (EDIT_MODE) marker.on('dragend', () => saveLocation(b, marker));
-        markers[b.id] = marker;
+  function esc(s) {
+    const d = document.createElement('div');
+    d.textContent = s ?? '';
+    return d.innerHTML;
+  }
+
+  async function saveLocation(b, marker) {
+    const { lat, lng } = marker.getLatLng();
+    const csrf = document.querySelector('meta[name="csrf-token"]').content;
+    try {
+      const res = await fetch(`/api/buildings/${b.id}/`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrf },
+        body: JSON.stringify({ latitude: lat.toFixed(6), longitude: lng.toFixed(6) }),
       });
-      map.invalidateSize();
-      if (points.length) map.fitBounds(points, { padding: [40, 40], maxZoom: 18 });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      marker.setPopupContent(`<strong>${esc(b.name)}</strong><br>Saved: ${lat.toFixed(6)}, ${lng.toFixed(6)}`);
+      marker.openPopup();
+    } catch (err) {
+      alert('Could not save location (' + err.message + '). Make sure you are logged in as an admin.');
     }
+  }
 
-    // ---- Room / office search ----
-    const input = document.getElementById('search');
-    const results = document.getElementById('results');
-    let timer;
+  function popupHtml(b) {
+    let html = `<strong>${esc(b.name)}</strong>`;
+    if (b.department_name) html += `<br><small>${esc(b.department_name)}</small>`;
+    if (b.description) html += `<p class="mb-1 mt-1">${esc(b.description)}</p>`;
+    if (b.image) html += `<img src="${esc(b.image)}" style="max-width:200px;border-radius:6px">`;
+    return html;
+  }
 
-    input.addEventListener('input', () => {
-      clearTimeout(timer);
-      const q = input.value.trim();
-      if (!q) { results.style.display = 'none'; return; }
-      timer = setTimeout(() => searchRooms(q), 300);   // debounce
+  async function loadBuildings() {
+    const res = await fetch('/api/buildings/');
+    const data = await res.json();
+    const buildings = data.results ?? data;   // works with or without pagination
+
+    fillDirectionSelects(buildings);
+
+    const points = [];
+    buildings.forEach(b => {
+      const pos = [parseFloat(b.latitude), parseFloat(b.longitude)];
+      points.push(pos);
+      const marker = L.marker(pos, { draggable: EDIT_MODE }).addTo(map).bindPopup(popupHtml(b));
+      if (EDIT_MODE) marker.on('dragend', () => saveLocation(b, marker));
+      markers[b.id] = marker;
     });
+    map.invalidateSize();
+    if (points.length) map.fitBounds(points, { padding: [60, 60], maxZoom: 18 });
+  }
 
-    async function searchRooms(q) {
-      const enc = encodeURIComponent(q);
-      const list = d => d.results ?? d;
-      const [rooms, buildings, facilities] = await Promise.all([
-        fetch('/api/rooms/?search=' + enc).then(r => r.json()).then(list),
-        fetch('/api/buildings/?search=' + enc).then(r => r.json()).then(list),
-        fetch('/api/facilities/?search=' + enc).then(r => r.json()).then(list),
-      ]);
+  // ---- Search: rooms, buildings, and facilities ----
+  const input = document.getElementById('search');
+  const results = document.getElementById('results');
+  let timer;
 
-      // Combine everything into one list; each item points to a building marker
-      const items = [
-        ...buildings.map(b => ({ title: b.name, sub: 'Building', buildingId: b.id })),
-        ...rooms.map(r => ({ title: r.name, sub: `${r.building_name} · floor ${r.floor}`, buildingId: r.building })),
-        ...facilities.map(f => ({ title: f.name, sub: `Facility · ${f.building_name}`, buildingId: f.building })),
-      ];
+  input.addEventListener('input', () => {
+    clearTimeout(timer);
+    const q = input.value.trim();
+    if (!q) { results.hidden = true; return; }
+    timer = setTimeout(() => searchAll(q), 300);   // debounce
+  });
 
-      results.innerHTML = '';
-      if (!items.length) {
-        results.innerHTML = '<div>No results found</div>';
+  function resultItem(title, sub, buildingId) {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'list-group-item list-group-item-action';
+
+    const t = document.createElement('div');
+    t.className = 'fw-semibold';
+    t.textContent = title;
+    const s = document.createElement('small');
+    s.className = 'text-muted';
+    s.textContent = sub;
+    btn.append(t, s);
+
+    btn.addEventListener('click', () => {
+      const marker = markers[buildingId];
+      if (marker) {
+        map.flyTo(marker.getLatLng(), 19);
+        marker.openPopup();
       }
-      items.forEach(it => {
-        const el = document.createElement('div');
-        el.innerHTML = `${esc(it.title)}<br><small>${esc(it.sub)}</small>`;
-        el.addEventListener('click', () => {
-          const marker = markers[it.buildingId];
-          if (marker) {
-            map.flyTo(marker.getLatLng(), 19);
-            marker.openPopup();
-          }
-          results.style.display = 'none';
-        });
-        results.appendChild(el);
+      results.hidden = true;
+    });
+    return btn;
+  }
+
+  async function searchAll(q) {
+    const enc = encodeURIComponent(q);
+    const list = d => d.results ?? d;
+    const [rooms, buildings, facilities] = await Promise.all([
+      fetch('/api/rooms/?search=' + enc).then(r => r.json()).then(list),
+      fetch('/api/buildings/?search=' + enc).then(r => r.json()).then(list),
+      fetch('/api/facilities/?search=' + enc).then(r => r.json()).then(list),
+    ]);
+
+    results.replaceChildren();
+    buildings.forEach(b => results.appendChild(resultItem(b.name, 'Building', b.id)));
+    rooms.forEach(r => results.appendChild(resultItem(r.name, `${r.building_name} \u00B7 floor ${r.floor}`, r.building)));
+    facilities.forEach(f => results.appendChild(resultItem(f.name, `Facility \u00B7 ${f.building_name}`, f.building)));
+
+    if (!results.children.length) {
+      const none = document.createElement('div');
+      none.className = 'list-group-item text-muted';
+      none.textContent = 'No results found';
+      results.appendChild(none);
+    }
+    results.hidden = false;
+  }
+
+  map.on('click', e => {
+    results.hidden = true;
+    if (!SHOW_COORDS_ON_CLICK) return;
+    L.popup()
+      .setLatLng(e.latlng)
+      .setContent(`<b>Latitude:</b> ${e.latlng.lat.toFixed(6)}<br><b>Longitude:</b> ${e.latlng.lng.toFixed(6)}`)
+      .openOn(map);
+  });
+
+  // ---- Walking directions (external routing API via /api/route/) ----
+  const directions = document.getElementById('directions');
+  const fromSel = document.getElementById('dir-from');
+  const toSel = document.getElementById('dir-to');
+  const dirInfo = document.getElementById('dir-info');
+  let routeLayer = null;
+
+  // keep the map uncluttered on phones
+  if (window.matchMedia('(max-width: 767px)').matches) directions.open = false;
+
+  function fillDirectionSelects(buildings) {
+    [fromSel, toSel].forEach(sel => {
+      sel.innerHTML = '';
+      buildings.forEach(b => {
+        const opt = document.createElement('option');
+        opt.value = b.id;
+        opt.textContent = b.name;
+        sel.appendChild(opt);
       });
-      results.style.display = 'block';
+    });
+    if (buildings.length > 1) toSel.selectedIndex = 1;   // default: two different buildings
+  }
+
+  function clearRoute() {
+    if (routeLayer) { map.removeLayer(routeLayer); routeLayer = null; }
+    dirInfo.textContent = '';
+  }
+
+  async function getDirections() {
+    clearRoute();
+    dirInfo.textContent = 'Finding route...';
+    try {
+      const res = await fetch(
+        `/api/route/?from=${encodeURIComponent(fromSel.value)}&to=${encodeURIComponent(toSel.value)}`
+      );
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Route unavailable');
+
+      routeLayer = L.geoJSON(data.geometry, {
+        style: { color: '#f58220', weight: 6, opacity: 0.9 },
+      }).addTo(map);
+      map.fitBounds(routeLayer.getBounds(), { padding: [60, 60] });
+
+      const mins = Math.max(1, Math.round(data.duration / 60));
+      dirInfo.textContent = `${data.distance} m \u00B7 about ${mins} min walk`;
+    } catch (err) {
+      dirInfo.textContent = err.message;
     }
+  }
 
-    // ---- Coordinate helper: click anywhere on the map to see its lat/lng. ----
-    // Use it to copy exact building coordinates into the admin. Set to false when done.
-    const SHOW_COORDS_ON_CLICK = true;
-    if (SHOW_COORDS_ON_CLICK) {
-      map.on('click', e => {
-        const lat = e.latlng.lat.toFixed(6);
-        const lng = e.latlng.lng.toFixed(6);
-        L.popup()
-          .setLatLng(e.latlng)
-          .setContent(`<b>Latitude:</b> ${lat}<br><b>Longitude:</b> ${lng}`)
-          .openOn(map);
-      });
-    }
+  document.getElementById('dir-go').addEventListener('click', getDirections);
+  document.getElementById('dir-clear').addEventListener('click', clearRoute);
 
-    // ---- Walking directions (external routing API via /api/route/) ----
-    const fromSel = document.getElementById('dir-from');
-    const toSel = document.getElementById('dir-to');
-    const dirInfo = document.getElementById('dir-info');
-    let routeLayer = null;
-
-    function fillDirectionSelects(buildings) {
-      [fromSel, toSel].forEach(sel => {
-        sel.innerHTML = '';
-        buildings.forEach(b => {
-          const opt = document.createElement('option');
-          opt.value = b.id;
-          opt.textContent = b.name;
-          sel.appendChild(opt);
-        });
-      });
-      if (buildings.length > 1) toSel.selectedIndex = 1;   // default: two different buildings
-    }
-
-    function clearRoute() {
-      if (routeLayer) { map.removeLayer(routeLayer); routeLayer = null; }
-      dirInfo.textContent = '';
-    }
-
-    async function getDirections() {
-      clearRoute();
-      dirInfo.textContent = 'Finding route...';
-      try {
-        const res = await fetch(
-          `/api/route/?from=${encodeURIComponent(fromSel.value)}&to=${encodeURIComponent(toSel.value)}`
-        );
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || 'Route unavailable');
-
-        routeLayer = L.geoJSON(data.geometry, {
-          style: { color: '#f58220', weight: 6, opacity: 0.9 },
-        }).addTo(map);
-        map.fitBounds(routeLayer.getBounds(), { padding: [60, 60] });
-
-        const mins = Math.max(1, Math.round(data.duration / 60));
-        dirInfo.textContent = `${data.distance} m \u00B7 about ${mins} min walk`;
-      } catch (err) {
-        dirInfo.textContent = err.message;
-      }
-    }
-
-    document.getElementById('dir-go').addEventListener('click', getDirections);
-    document.getElementById('dir-clear').addEventListener('click', clearRoute);
-
-    loadBuildings();
-  </script>
-</body>
-</html>
+  window.addEventListener('load', () => map.invalidateSize());
+  loadBuildings();
+</script>
+{% endblock %}

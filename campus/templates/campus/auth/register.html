@@ -1,27 +1,27 @@
 {% extends 'campus/auth/auth_base.html' %}
 
 {% block title %}Register - CampusConnect{% endblock %}
+{% block card_class %}auth-card-wide{% endblock %}
 
 {% block content %}
 <h1 class="h5 mb-1">Create an account</h1>
-<p class="text-muted small">New accounts start as <strong>Student</strong>. An admin can change your role later.</p>
+<p class="text-muted small mb-3">Use your email to log in. New accounts start as <strong>Student</strong>.</p>
 
 <form method="post" novalidate>
   {% csrf_token %}
   {% if form.non_field_errors %}
-    <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+    <div class="alert alert-danger py-2">{{ form.non_field_errors }}</div>
   {% endif %}
 
-  {% for field in form %}
-    <div class="mb-3">
-      <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
-      {{ field }}
-      {% if field.help_text %}<div class="form-text">{{ field.help_text|safe }}</div>{% endif %}
-      {% for error in field.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
-    </div>
-  {% endfor %}
+  <div class="row g-2">
+    <div class="col-sm-6">{% include 'campus/auth/_field.html' with field=form.first_name %}</div>
+    <div class="col-sm-6">{% include 'campus/auth/_field.html' with field=form.last_name %}</div>
+    <div class="col-12">{% include 'campus/auth/_field.html' with field=form.email %}</div>
+    <div class="col-sm-6">{% include 'campus/auth/_field.html' with field=form.password1 %}</div>
+    <div class="col-sm-6">{% include 'campus/auth/_field.html' with field=form.password2 %}</div>
+  </div>
 
-  <button type="submit" class="btn btn-psu w-100">Register</button>
+  <button type="submit" class="btn btn-psu w-100 mt-2">Register</button>
 </form>
 
 <p class="text-center small mt-3 mb-0">

@@ -95,9 +95,6 @@ DATABASES = {
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
         'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
     },
     {
@@ -143,4 +140,6 @@ REST_FRAMEWORK = {
 
 SECURE_REFERRER_POLICY = 'strict-origin-when-cross-origin'
 
-LOGIN_URL = 'admin:login'
+LOGIN_URL = 'login'
+LOGIN_REDIRECT_URL = 'dashboard'
+LOGOUT_REDIRECT_URL = 'login'

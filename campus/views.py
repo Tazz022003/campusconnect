@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from rest_framework import filters, viewsets
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
+#from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from .permissions import RolePermission
 
 from .models import (
     Announcement, Building, Department, Event, Facility,
@@ -15,7 +16,7 @@ from .serializers import (
 
 class BaseViewSet(viewsets.ModelViewSet):
     """Anyone can read; only logged-in users can create/update/delete."""
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [RolePermission]
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
 
 
