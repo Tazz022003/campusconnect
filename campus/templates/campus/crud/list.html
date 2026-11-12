@@ -11,10 +11,10 @@
     {% if q %}<a href="{% url list_url %}" class="btn btn-outline-secondary">Clear</a>{% endif %}
   </form>
 
-  {% if user.is_authenticated %}
+  {% if can_create %}
     <a href="{% url create_url %}" class="btn btn-psu"><i class="bi bi-plus-lg"></i> Add {{ singular }}</a>
-  {% else %}
-    <a href="{% url 'admin:login' %}?next={{ request.path }}" class="btn btn-outline-secondary">
+  {% elif not user.is_authenticated %}
+    <a href="{% url 'login' %}?next={{ request.path }}" class="btn btn-outline-secondary">
       <i class="bi bi-box-arrow-in-right"></i> Log in to add or edit
     </a>
   {% endif %}
@@ -26,14 +26,14 @@
       <thead class="table-light">
         <tr>
           {% for h in headers %}<th>{{ h }}</th>{% endfor %}
-          {% if user.is_authenticated %}<th class="text-end">Actions</th>{% endif %}
+          {% if can_manage %}<th class="text-end">Actions</th>{% endif %}
         </tr>
       </thead>
       <tbody>
         {% for row in rows %}
           <tr>
             {% for cell in row.cells %}<td>{{ cell }}</td>{% endfor %}
-            {% if user.is_authenticated %}
+            {% if can_manage %}
               <td class="text-end text-nowrap">
                 <a href="{% url update_url row.obj.pk %}" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i> Edit</a>
                 <a href="{% url delete_url row.obj.pk %}" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i> Delete</a>
