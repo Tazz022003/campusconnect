@@ -15,9 +15,10 @@ from datetime import datetime
 
 from django import forms
 from django.contrib import messages
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import UserPassesTestMixin
 from django.db.models import Q
 from django.forms import modelform_factory
+from django.shortcuts import redirect
 from django.urls import path, reverse_lazy
 from django.utils import timezone
 from django.views.generic import CreateView, DeleteView, ListView, UpdateView
@@ -26,6 +27,7 @@ from .models import (
     Announcement, Building, Department, Event, Facility,
     MaintenanceReport, Room,
 )
+from .permissions import ROLE_RULES, get_role
 
 
 @dataclass
@@ -40,6 +42,15 @@ class CrudConfig:
     search: list = field(default_factory=list)            # fields searched by the search box
     user_field: str = ''                                  # filled with the logged-in user on create
     datetime_fields: list = field(default_factory=list)   # fields shown with a date-time picker
+
+    # who may add / edit+delete records of this table (rules live in permissions.py)
+    @property
+    def create_roles(self):
+        return ROLE_RULES[self.model._meta.model_name]['create']
+
+    @property
+    def manage_roles(self):
+        return ROLE_RULES[self.model._meta.model_name]['manage']
 
 
 # ----------------------------------------------------------------------------
@@ -143,11 +154,13 @@ def url_names(cfg):
     }
 
 
-def base_context(cfg):
+def base_context(cfg, user):
+    role = get_role(user)
     return {
         'title': cfg.title,
         'singular': cfg.singular,
-        'nav_key': cfg.name,
+        'can_create': role in cfg.create_roles,   # shows the "Add" button
+        'can_manage': role in cfg.manage_roles,   # shows the Edit / Delete buttons
         **url_names(cfg),
     }
 
@@ -174,7 +187,7 @@ class CrudListView(ListView):
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
-        ctx.update(base_context(self.cfg))
+        ctx.update(base_context(self.cfg, self.request.user))
         ctx['q'] = self.request.GET.get('q', '').strip()
         ctx['headers'] = [label for label, _ in self.cfg.columns]
         ctx['rows'] = [
@@ -184,7 +197,23 @@ class CrudListView(ListView):
         return ctx
 
 
-class CrudFormMixin(LoginRequiredMixin):
+class RoleRequiredMixin(UserPassesTestMixin):
+    """Only users whose role is allowed (see permissions.py) can open the page."""
+    cfg = None
+    required = 'manage'     # 'create' or 'manage'
+
+    def test_func(self):
+        rules = ROLE_RULES[self.cfg.model._meta.model_name]
+        return get_role(self.request.user) in rules[self.required]
+
+    def handle_no_permission(self):
+        if self.request.user.is_authenticated:
+            messages.error(self.request, 'Your account does not have permission to do that.')
+            return redirect(f'{self.cfg.name}_list')
+        return super().handle_no_permission()      # not logged in -> go to the login page
+
+
+class CrudFormMixin(RoleRequiredMixin):
     cfg = None
     template_name = 'campus/crud/form.html'
     is_edit = False
@@ -217,7 +246,7 @@ class CrudFormMixin(LoginRequiredMixin):
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
-        ctx.update(base_context(self.cfg))
+        ctx.update(base_context(self.cfg, self.request.user))
         ctx['is_edit'] = self.is_edit
         return ctx
 
@@ -235,14 +264,17 @@ class CrudFormMixin(LoginRequiredMixin):
 
 class CrudCreateView(CrudFormMixin, CreateView):
     is_edit = False
+    required = 'create'
 
 
 class CrudUpdateView(CrudFormMixin, UpdateView):
     is_edit = True
+    required = 'manage'
 
 
-class CrudDeleteView(LoginRequiredMixin, DeleteView):
+class CrudDeleteView(RoleRequiredMixin, DeleteView):
     cfg = None
+    required = 'manage'
     template_name = 'campus/crud/confirm_delete.html'
 
     def get_queryset(self):
@@ -250,7 +282,7 @@ class CrudDeleteView(LoginRequiredMixin, DeleteView):
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
-        ctx.update(base_context(self.cfg))
+        ctx.update(base_context(self.cfg, self.request.user))
         return ctx
 
     def get_success_url(self):
