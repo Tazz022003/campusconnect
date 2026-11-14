@@ -1,0 +1,35 @@
+{% extends 'campus/base.html' %}
+
+{% block title %}My Profile - CampusConnect{% endblock %}
+{% block heading %}My Profile{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-md-6 col-lg-5">
+    <div class="card">
+      <div class="card-header"><i class="bi bi-person-gear text-success"></i> Profile Settings</div>
+      <div class="card-body text-center">
+        
+        <!-- Display Current Avatar -->
+        {% if user.profile.avatar %}
+          <img src="{{ user.profile.avatar.url }}" alt="Avatar" class="rounded-circle mb-4 shadow-sm" style="width: 150px; height: 150px; object-fit: cover;">
+        {% else %}
+          <i class="bi bi-person-circle text-secondary mb-4" style="font-size: 150px; line-height: 1;"></i>
+        {% endif %}
+
+        <!-- Upload Form -->
+        <form method="post" enctype="multipart/form-data" class="text-start">
+          {% csrf_token %}
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Upload New Picture</label>
+            {{ form.avatar }}
+            <div class="form-text">Choose a square image for best results.</div>
+          </div>
+          <button type="submit" class="btn btn-psu w-100"><i class="bi bi-cloud-upload me-1"></i> Save Avatar</button>
+        </form>
+
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,21 +1,11 @@
 """
 Generic CRUD pages for CampusConnect.
-
-Each table is described by one CrudConfig below. From that config we build:
-    list   -> /buildings/              (search + pagination)
-    create -> /buildings/add/          (login required)
-    update -> /buildings/<id>/edit/    (login required)
-    delete -> /buildings/<id>/delete/  (login required, with confirmation)
-
-URL names follow the pattern  <name>_list / <name>_create / <name>_update / <name>_delete
-e.g. building_list, building_create, building_update, building_delete.
 """
 from dataclasses import dataclass, field
 from datetime import datetime
 
 from django import forms
 from django.contrib import messages
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Q
 from django.forms import modelform_factory
 from django.urls import path, reverse_lazy
@@ -27,24 +17,18 @@ from .models import (
     MaintenanceReport, Room,
 )
 
-
 @dataclass
 class CrudConfig:
-    name: str                 # used for url names, e.g. 'building'
-    slug: str                 # used in the url, e.g. 'buildings'
+    name: str                 
+    slug: str                 
     model: type
-    title: str                # plural title, e.g. 'Buildings'
-    singular: str             # e.g. 'Building'
-    columns: list             # [(header, 'attribute.path'), ...] shown in the list table
-    fields: list              # model fields shown in the add/edit form
-    search: list = field(default_factory=list)            # fields searched by the search box
-    user_field: str = ''                                  # filled with the logged-in user on create
-    datetime_fields: list = field(default_factory=list)   # fields shown with a date-time picker
+    title: str                
+    singular: str             
+    columns: list             
+    fields: list              
+    search: list = field(default_factory=list)            
+    datetime_fields: list = field(default_factory=list)   
 
-
-# ----------------------------------------------------------------------------
-# One config per table. To add a new table, add one more CrudConfig here.
-# ----------------------------------------------------------------------------
 CONFIGS = [
     CrudConfig(
         name='department', slug='departments', model=Department,
@@ -84,35 +68,26 @@ CONFIGS = [
                  ('Building', 'building.name')],
         fields=['title', 'description', 'date_start', 'date_end', 'building'],
         search=['title', 'building__name'],
-        user_field='created_by',
         datetime_fields=['date_start', 'date_end'],
     ),
     CrudConfig(
         name='announcement', slug='announcements', model=Announcement,
         title='Announcements', singular='Announcement',
-        columns=[('Title', 'title'), ('Posted', 'posted_at'), ('By', 'posted_by.username')],
+        columns=[('Title', 'title'), ('Posted', 'posted_at')],
         fields=['title', 'body'],
         search=['title', 'body'],
-        user_field='posted_by',
     ),
     CrudConfig(
         name='report', slug='reports', model=MaintenanceReport,
         title='Maintenance Reports', singular='Maintenance Report',
         columns=[('Report', 'description'), ('Status', 'get_status_display'),
-                 ('Room', 'room.name'), ('Facility', 'facility.name'),
-                 ('Reported by', 'reported_by.username')],
+                 ('Room', 'room.name'), ('Facility', 'facility.name')],
         fields=['description', 'status', 'room', 'facility'],
         search=['description', 'status'],
-        user_field='reported_by',
     ),
 ]
 
-
-# ----------------------------------------------------------------------------
-# Helpers
-# ----------------------------------------------------------------------------
 def resolve(obj, dotted):
-    """Follow a path like 'building.name'. Returns '' if something along the way is empty."""
     value = obj
     for part in dotted.split('.'):
         value = getattr(value, part, None)
@@ -122,9 +97,7 @@ def resolve(obj, dotted):
             value = value()
     return value
 
-
 def cell_text(obj, accessor):
-    """Turn a value into display text for the list table."""
     value = resolve(obj, accessor)
     if isinstance(value, bool):
         return 'Yes' if value else 'No'
@@ -132,7 +105,6 @@ def cell_text(obj, accessor):
         return timezone.localtime(value).strftime('%b %d, %Y %I:%M %p')
     text = str(value)
     return text if len(text) <= 60 else text[:57] + '...'
-
 
 def url_names(cfg):
     return {
@@ -142,7 +114,6 @@ def url_names(cfg):
         'delete_url': f'{cfg.name}_delete',
     }
 
-
 def base_context(cfg):
     return {
         'title': cfg.title,
@@ -151,10 +122,6 @@ def base_context(cfg):
         **url_names(cfg),
     }
 
-
-# ----------------------------------------------------------------------------
-# Views
-# ----------------------------------------------------------------------------
 class CrudListView(ListView):
     cfg = None
     template_name = 'campus/crud/list.html'
@@ -183,8 +150,8 @@ class CrudListView(ListView):
         ]
         return ctx
 
-
-class CrudFormMixin(LoginRequiredMixin):
+# Removed LoginRequiredMixin
+class CrudFormMixin:
     cfg = None
     template_name = 'campus/crud/form.html'
     is_edit = False
@@ -225,23 +192,18 @@ class CrudFormMixin(LoginRequiredMixin):
         return reverse_lazy(f'{self.cfg.name}_list')
 
     def form_valid(self, form):
-        # on create, remember who made it (event.created_by, announcement.posted_by, ...)
-        if self.cfg.user_field and not form.instance.pk:
-            setattr(form.instance, self.cfg.user_field, self.request.user)
         response = super().form_valid(form)
         messages.success(self.request, f'{self.cfg.singular} saved.')
         return response
 
-
 class CrudCreateView(CrudFormMixin, CreateView):
     is_edit = False
-
 
 class CrudUpdateView(CrudFormMixin, UpdateView):
     is_edit = True
 
-
-class CrudDeleteView(LoginRequiredMixin, DeleteView):
+# Removed LoginRequiredMixin
+class CrudDeleteView(DeleteView):
     cfg = None
     template_name = 'campus/crud/confirm_delete.html'
 
@@ -261,10 +223,6 @@ class CrudDeleteView(LoginRequiredMixin, DeleteView):
         messages.success(self.request, f'{self.cfg.singular} deleted.')
         return response
 
-
-# ----------------------------------------------------------------------------
-# URL patterns (imported by campus/urls.py)
-# ----------------------------------------------------------------------------
 crud_urlpatterns = []
 for _cfg in CONFIGS:
     crud_urlpatterns += [

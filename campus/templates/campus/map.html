@@ -194,7 +194,7 @@
         if (!res.ok) throw new Error(data.error || 'Route unavailable');
 
         routeLayer = L.geoJSON(data.geometry, {
-          style: { color: '#f58220', weight: 6, opacity: 0.9 },
+          style: { color: '#10b981', weight: 6, opacity: 0.9 },
         }).addTo(map);
         map.fitBounds(routeLayer.getBounds(), { padding: [60, 60] });
 

@@ -1,6 +1,8 @@
-from django.shortcuts import render
+# campus/views.py
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
 from rest_framework import filters, viewsets
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework.permissions import AllowAny, IsAuthenticatedOrReadOnly
 
 from .models import (
     Announcement, Building, Department, Event, Facility,
@@ -11,11 +13,11 @@ from .serializers import (
     EventSerializer, FacilitySerializer, MaintenanceReportSerializer,
     RoomSerializer,
 )
+from .forms import ProfileForm
 
 
 class BaseViewSet(viewsets.ModelViewSet):
-    """Anyone can read; only logged-in users can create/update/delete."""
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [AllowAny]
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
 
 
@@ -34,7 +36,6 @@ class BuildingViewSet(BaseViewSet):
 class RoomViewSet(BaseViewSet):
     queryset = Room.objects.select_related('building', 'department')
     serializer_class = RoomSerializer
-    # /api/rooms/?search=registrar  -> also matches the building name
     search_fields = ['name', 'building__name', 'department__name']
 
 
@@ -45,31 +46,36 @@ class FacilityViewSet(BaseViewSet):
 
 
 class EventViewSet(BaseViewSet):
-    queryset = Event.objects.select_related('building', 'created_by')
+    queryset = Event.objects.select_related('building')
     serializer_class = EventSerializer
     search_fields = ['title', 'building__name']
 
-    def perform_create(self, serializer):
-        serializer.save(created_by=self.request.user)
-
 
 class AnnouncementViewSet(BaseViewSet):
-    queryset = Announcement.objects.select_related('posted_by')
+    queryset = Announcement.objects.all()
     serializer_class = AnnouncementSerializer
     search_fields = ['title', 'body']
 
-    def perform_create(self, serializer):
-        serializer.save(posted_by=self.request.user)
-
 
 class MaintenanceReportViewSet(BaseViewSet):
-    queryset = MaintenanceReport.objects.select_related('reported_by', 'room', 'facility')
+    queryset = MaintenanceReport.objects.select_related('room', 'facility')
     serializer_class = MaintenanceReportSerializer
     search_fields = ['description', 'status']
 
-    def perform_create(self, serializer):
-        serializer.save(reported_by=self.request.user)
 
 def map_page(request):
     return render(request, 'campus/map.html')
-# Create your views here.
+
+
+@login_required
+def profile_view(request):
+    profile = request.user.profile
+    if request.method == 'POST':
+        form = ProfileForm(request.POST, request.FILES, instance=profile)
+        if form.is_valid():
+            form.save()
+            return redirect('profile')
+    else:
+        form = ProfileForm(instance=profile)
+    
+    return render(request, 'campus/profile.html', {'form': form})

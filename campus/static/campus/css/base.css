@@ -1,30 +1,138 @@
-/* CampusConnect - layout, sidebar, cards (used by every page except the map) */
+/* CampusConnect - Modern Layout & Sidebar */
 
 :root {
-  --psu-orange: #f58220;
-  --psu-orange-dark: #d96b0b;
+  --psu-green: #10b981;
+  --psu-green-dark: #059669;
   --sidebar-bg: #1f2430;
+  --sidebar-hover: rgba(255, 255, 255, 0.08);
   --page-bg: #f5f6fa;
 }
-body { background: var(--page-bg); }
-.sidebar { width: 250px; }
-.sidebar-inner { background: var(--sidebar-bg); min-height: 100%; }
-@media (min-width: 992px) {
-  /* Bootstrap forces offcanvas-lg to be transparent/auto-sized on large screens, so override it */
-  .sidebar { position: sticky; top: 0; height: 100vh !important; width: 250px !important;
-             flex: 0 0 250px !important; overflow-y: auto; }
+
+body { 
+  background: var(--page-bg); 
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  overflow-x: hidden; /* Kills the horizontal scrollbar */
 }
-.brand { color: #fff; font-weight: 700; font-size: 1.25rem; text-decoration: none; }
-.brand span { color: var(--psu-orange); }
-.sidebar .nav-link { color: #c5cad6; border-radius: 8px; padding: .55rem .8rem; display: flex; gap: .7rem; align-items: center; }
-.sidebar .nav-link:hover { background: rgba(255,255,255,.08); color: #fff; }
-.sidebar .nav-link.active { background: var(--psu-orange); color: #fff; }
-.nav-section { color: #7f8798; font-size: .72rem; letter-spacing: .08em; text-transform: uppercase; margin: 1rem .8rem .3rem; }
-.main { min-width: 0; }
-.topbar { background: #fff; border-bottom: 1px solid #e5e7ee; }
-.stat-card { border: 0; border-radius: 14px; box-shadow: 0 1px 4px rgba(0,0,0,.06); }
-.stat-icon { width: 48px; height: 48px; border-radius: 12px; display: grid; place-items: center; font-size: 1.4rem; }
-.card { border: 0; border-radius: 14px; box-shadow: 0 1px 4px rgba(0,0,0,.06); }
-.card-header { background: transparent; font-weight: 600; border-bottom: 1px solid #eef0f5; }
-.btn-psu { background: var(--psu-orange); border-color: var(--psu-orange); color: #fff; }
-.btn-psu:hover { background: var(--psu-orange-dark); border-color: var(--psu-orange-dark); color: #fff; }
+
+/* --- SIDEBAR LAYOUT --- */
+.sidebar { 
+  width: 260px; 
+  height: 100vh;
+  background-color: var(--sidebar-bg) !important; 
+  overflow: hidden;
+}
+
+@media (min-width: 992px) {
+  .sidebar { 
+    position: sticky; 
+    top: 0; 
+    flex: 0 0 260px !important; 
+  }
+}
+
+.sidebar-inner {
+  background-color: var(--sidebar-bg) !important;
+}
+
+/* Nav Links */
+.sidebar .nav-link { 
+  color: #aeb6c4; 
+  border-radius: 8px; 
+  padding: 0.65rem 0.8rem; 
+  display: flex; 
+  gap: 0.8rem; 
+  align-items: center; 
+  font-weight: 500;
+  transition: all 0.2s ease-in-out;
+  white-space: nowrap;
+}
+.sidebar .nav-link:hover { 
+  background: var(--sidebar-hover); 
+  color: #fff; 
+}
+/* Force Green Active State */
+.sidebar .nav-link.active { 
+  background-color: #10b981 !important; 
+  color: #fff !important; 
+  box-shadow: 0 4px 6px rgba(16, 185, 129, 0.2);
+}
+.sidebar .nav-link i { font-size: 1.1rem; }
+
+/* Section Dividers */
+.nav-section { 
+  color: #6c778b; 
+  font-size: 0.7rem; 
+  letter-spacing: 0.1em; 
+  text-transform: uppercase; 
+  font-weight: 700;
+  margin: 1.5rem 0.8rem 0.5rem; 
+}
+
+/* Brand */
+.brand { color: #fff; font-weight: 700; font-size: 1.3rem; text-decoration: none; letter-spacing: -0.5px;}
+/* Force Green Brand Text */
+.brand span { color: #10b981 !important; }
+.brand i { margin-right: 4px; }
+
+/* Custom Scrollbar for Nav */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #3a4152 transparent;
+}
+.custom-scrollbar::-webkit-scrollbar { width: 5px; }
+.custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: #3a4152; border-radius: 10px; }
+.custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #4a5568; }
+
+
+/* --- MAIN CONTENT & CARDS --- */
+.topbar { 
+  background: #fff; 
+  border-bottom: 1px solid #e5e7ee; 
+  z-index: 1000;
+}
+
+.card { 
+  border: 0; 
+  border-radius: 12px; 
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04); 
+  background: #fff;
+}
+.card-header { 
+  background: transparent; 
+  font-weight: 600; 
+  border-bottom: 1px solid #eef0f5; 
+  padding: 1.25rem 1.5rem;
+}
+.card-body { padding: 1.5rem; }
+
+
+/* --- STAT CARDS --- */
+.stat-card { 
+  border: 0; 
+  border-radius: 12px; 
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04); 
+  background: #fff;
+}
+.stat-icon { 
+  width: 52px; 
+  height: 52px; 
+  border-radius: 12px; 
+  display: grid; 
+  place-items: center; 
+  font-size: 1.5rem; 
+}
+
+
+/* --- BUTTONS --- */
+.btn-psu { 
+  background-color: #10b981 !important; 
+  border-color: #10b981 !important; 
+  color: #fff !important; 
+  font-weight: 500;
+}
+.btn-psu:hover { 
+  background-color: #059669 !important; 
+  border-color: #059669 !important; 
+  color: #fff !important; 
+}
