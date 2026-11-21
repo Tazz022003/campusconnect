@@ -16,7 +16,7 @@
 
   <!-- Sidebar -->
   <aside class="offcanvas-lg offcanvas-start sidebar" tabindex="-1" id="sidebar">
-    <div class="sidebar-inner p-3 d-flex flex-column h-100">
+    <div class="sidebar-inner p-3 d-flex flex-column">
       <div class="d-flex justify-content-between align-items-center mb-3">
         <a href="{% url 'dashboard' %}" class="brand"><i class="bi bi-geo-alt-fill" style="color: var(--psu-orange)"></i> Campus<span>Connect</span></a>
         <button type="button" class="btn-close btn-close-white d-lg-none" data-bs-dismiss="offcanvas" data-bs-target="#sidebar"></button>
@@ -42,8 +42,6 @@
         <a class="nav-link {% if 'user' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'user_list' %}"><i class="bi bi-people"></i> Users</a>
         {% endif %}
 
-        <div class="nav-section">Developers</div>
-        <a class="nav-link" href="/api/" target="_blank"><i class="bi bi-braces"></i> REST API</a>
       </nav>
 
       <div class="mt-auto pt-3 border-top border-secondary">
