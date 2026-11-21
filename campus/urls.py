@@ -1,6 +1,7 @@
 from django.contrib.auth.views import LogoutView
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
+from django.contrib.auth.decorators import login_not_required
 
 from . import accounts, dashboard, routing, views
 from .crud import crud_urlpatterns
@@ -26,4 +27,6 @@ urlpatterns = [
     path('users/', accounts.UserListView.as_view(), name='user_list'),
     path('users/<int:pk>/role/', accounts.UserRoleUpdateView.as_view(), name='user_role'),
     path('users/<int:pk>/delete/', accounts.UserDeleteView.as_view(), name='user_delete'),
+    path('login/', login_not_required(accounts.CampusLoginView.as_view()), name='login'),
+    path('register/', login_not_required(accounts.register), name='register'),
 ] + crud_urlpatterns
