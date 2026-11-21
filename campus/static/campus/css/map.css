@@ -40,5 +40,9 @@
 
 /* phones: directions panel goes under the search box */
 @media (max-width: 767px) {
-  #directions { top: 64px; left: 12px; right: 12px; width: auto; }
+  #directions { top: 64px; left: 12px; right: 12px; width: auto; max-height: calc(100% - 140px); overflow-y: auto; }
+  #search-panel { left: 56px; width: calc(100% - 68px); }
+  #results { max-height: 40vh; }
+  #edit-hint { display: none; }            /* editing pins is a desktop job */
+  .leaflet-popup-content { max-width: 220px; }
 }

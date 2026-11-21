@@ -191,7 +191,9 @@ class CrudListView(ListView):
         ctx['q'] = self.request.GET.get('q', '').strip()
         ctx['headers'] = [label for label, _ in self.cfg.columns]
         ctx['rows'] = [
-            {'obj': obj, 'cells': [cell_text(obj, accessor) for _, accessor in self.cfg.columns]}
+            {'obj': obj,
+             'cells': [{'label': label, 'text': cell_text(obj, accessor)}
+                       for label, accessor in self.cfg.columns]}
             for obj in ctx['object_list']
         ]
         return ctx
