@@ -60,11 +60,10 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'campus.middleware.RequireLoginMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'django.contrib.auth.middleware.LoginRequiredMiddleware',
 ]
-
 ROOT_URLCONF = 'campusconnect.urls'
 
 TEMPLATES = [
