@@ -25,6 +25,7 @@ SECRET_KEY = 'django-insecure-ho%$xnz9)17*zt(@4dpkfpc=%8rj2k%)dwwbagf@8sev$gv+8*
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DJANGO_DEBUG', 'True') == 'True'
+os.environ['ORS_API_KEY'] = 'eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6ImM5OTM1ZDk5YjZkNDQwM2ZiNGNlNzcwNjkxMjQxZGNlIiwiaCI6Im11cm11cjY0In0='
 
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'campusconnect.pythonanywhere.com']
 CSRF_TRUSTED_ORIGINS = ['https://campusconnect.pythonanywhere.com']

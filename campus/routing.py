@@ -4,7 +4,7 @@ from django.http import JsonResponse
 
 from .models import Building
 
-# FOSSGIS-hosted OSRM with a real *walking* profile.
+# OSRM with a real *walking* profile, hosted by FOSSGIS (uses OpenStreetMap data).
 # (The generic router.project-osrm.org demo ignores the profile and always returns car routes.)
 OSRM_FOOT_URL = 'https://routing.openstreetmap.de/routed-foot/route/v1/foot/'
 
@@ -15,7 +15,14 @@ CACHE_SECONDS = 60 * 60 * 24   # same two buildings -> reuse the answer for a da
 
 
 def campus_route(request):
-    """GET /api/route/?from=<building_id>&to=<building_id> -> walking route between two buildings."""
+    """
+    GET /api/route/?from=<building_id>&to=<building_id>
+
+    Walking route between two buildings, fetched from the external routing API by the server.
+    (The map page tries the routing API directly from the browser first, and uses this
+    endpoint as a backup. This one is the only option where the web host blocks outgoing
+    requests from the browser's side, so it is also what you use on your own PC.)
+    """
     try:
         start = Building.objects.get(pk=request.GET.get('from'))
         end = Building.objects.get(pk=request.GET.get('to'))
@@ -57,6 +64,7 @@ def campus_route(request):
             'distance': round(route['distance']),   # meters
             'duration': round(route['duration']),   # seconds
             'geometry': route['geometry'],          # GeoJSON LineString
+            'credit': 'Routing by OSRM (FOSSGIS) \u00B7 \u00A9 OpenStreetMap contributors',
         }
         cache.set(cache_key, result, CACHE_SECONDS)
 

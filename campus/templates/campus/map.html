@@ -39,8 +39,8 @@
         <button id="dir-clear" type="button" class="btn btn-sm btn-outline-secondary">Clear</button>
       </div>
       <div id="dir-info" class="fw-semibold small mt-2"></div>
-      <div class="text-muted mt-2" style="font-size: .7rem;">
-        Routing by OSRM (FOSSGIS) &middot; &copy; OpenStreetMap contributors
+      <div id="dir-credit" class="text-muted mt-2" style="font-size: .7rem;">
+        Walking routes &middot; &copy; OpenStreetMap contributors
       </div>
     </div>
   </details>
@@ -63,6 +63,7 @@
   }).addTo(map);
 
   const markers = {};   // building id -> marker
+  const buildingsById = {};   // building id -> building data (for directions)
 
   // ---- Edit mode: admins can drag a pin to the right spot and it saves automatically. ----
   // ALLOW_EDITING is the master switch: set it to false for the final demo.
@@ -109,6 +110,7 @@
     const data = await res.json();
     const buildings = data.results ?? data;   // works with or without pagination
 
+    buildings.forEach(b => { buildingsById[b.id] = b; });
     fillDirectionSelects(buildings);
 
     const points = [];
@@ -219,15 +221,52 @@
     dirInfo.textContent = '';
   }
 
+  // OSRM walking routes (FOSSGIS), based on OpenStreetMap data
+  const OSRM_FOOT = 'https://routing.openstreetmap.de/routed-foot/route/v1/foot/';
+
+  class NoRouteError extends Error {}
+
+  // 1st choice: ask the routing service straight from the visitor's browser
+  async function routeFromBrowser(a, b) {
+    const coords = `${a.longitude},${a.latitude};${b.longitude},${b.latitude}`;
+    const res = await fetch(`${OSRM_FOOT}${coords}?overview=full&geometries=geojson`);
+    if (!res.ok) throw new Error('Routing service unavailable');
+    const data = await res.json();
+    if (data.code !== 'Ok' || !data.routes || !data.routes.length) {
+      throw new NoRouteError('No walking route found between these buildings.');
+    }
+    const r = data.routes[0];
+    return {
+      distance: Math.round(r.distance),
+      duration: Math.round(r.duration),
+      geometry: r.geometry,
+      credit: 'Routing by OSRM (FOSSGIS) \u00B7 \u00A9 OpenStreetMap contributors',
+    };
+  }
+
+  // backup: ask our own server, which calls the routing service for us
+  async function routeFromServer(fromId, toId) {
+    const res = await fetch(`/api/route/?from=${encodeURIComponent(fromId)}&to=${encodeURIComponent(toId)}`);
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Route unavailable');
+    return data;
+  }
+
   async function getDirections() {
     clearRoute();
+    if (fromSel.value === toSel.value) {
+      dirInfo.textContent = 'Please choose two different buildings.';
+      return;
+    }
     dirInfo.textContent = 'Finding route...';
     try {
-      const res = await fetch(
-        `/api/route/?from=${encodeURIComponent(fromSel.value)}&to=${encodeURIComponent(toSel.value)}`
-      );
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Route unavailable');
+      let data;
+      try {
+        data = await routeFromBrowser(buildingsById[fromSel.value], buildingsById[toSel.value]);
+      } catch (err) {
+        if (err instanceof NoRouteError) throw err;
+        data = await routeFromServer(fromSel.value, toSel.value);   // browser could not reach it
+      }
 
       routeLayer = L.geoJSON(data.geometry, {
         style: { color: '#f58220', weight: 6, opacity: 0.9 },
@@ -236,6 +275,7 @@
 
       const mins = Math.max(1, Math.round(data.duration / 60));
       dirInfo.textContent = `${data.distance} m \u00B7 about ${mins} min walk`;
+      if (data.credit) document.getElementById('dir-credit').textContent = data.credit;
     } catch (err) {
       dirInfo.textContent = err.message;
     }
