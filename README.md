@@ -161,3 +161,15 @@ campusconnect/
 - Walking routes by [OSRM](https://project-osrm.org/) (FOSSGIS routing server)
 - [Leaflet](https://leafletjs.com/), [Bootstrap](https://getbootstrap.com/), [Django](https://www.djangoproject.com/)
 
+## creating .env format
+# Django
+DJANGO_DEBUG=True
+
+# Google OAuth (from Google Cloud Console)
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+
+
+
+GITHUB_CLIENT_ID=
+GITHUB_CLIENT_SECRET=

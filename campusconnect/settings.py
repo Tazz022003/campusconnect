@@ -28,13 +28,13 @@ except ImportError:
 # See https://docs.djangoproject.com/en/6.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-ho%$xnz9)17*zt(@4dpkfpc=%8rj2k%)dwwbagf@8sev$gv+8*'
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-ho%$xnz9)17*zt(@4dpkfpc=%8rj2k%)dwwbagf@8sev$gv+8*')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DJANGO_DEBUG', 'True') == 'True'
 
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'campusconnect.pythonanywhere.com']
+ALLOWED_HOSTS = ['127.0.0.1', '127.0.1.1', 'localhost', 'campusconnect.pythonanywhere.com']
 CSRF_TRUSTED_ORIGINS = ['https://campusconnect.pythonanywhere.com']
 
 STATIC_URL = 'static/'
