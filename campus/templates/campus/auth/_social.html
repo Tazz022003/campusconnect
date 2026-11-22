@@ -1,0 +1,14 @@
+{% load socialaccount %}
+{% if social_providers %}
+  <div class="auth-divider"><span>or continue with</span></div>
+  <div class="d-flex gap-2">
+    {% for p in social_providers %}
+      <form method="post" action="{% provider_login_url p.id %}" class="flex-fill">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-outline-dark w-100 social-btn">
+          <i class="bi {{ p.icon }}"></i> {{ p.name }}
+        </button>
+      </form>
+    {% endfor %}
+  </div>
+{% endif %}

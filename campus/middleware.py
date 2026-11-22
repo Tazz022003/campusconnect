@@ -4,6 +4,7 @@ from django.contrib.auth.views import redirect_to_login
 OPEN_PREFIXES = (
     '/login/',
     '/register/',
+    '/accounts/',       # Google / GitHub sign-in (django-allauth)
     '/static/',
     '/media/',
     '/admin/',          # Django admin has its own login page

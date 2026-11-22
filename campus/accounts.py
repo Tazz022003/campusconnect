@@ -1,3 +1,4 @@
+import os
 import re
 
 from django import forms
@@ -13,6 +14,17 @@ from django.views.generic import DeleteView, ListView, UpdateView
 
 from .models import Profile
 from .permissions import get_role
+
+
+# Social sign-in buttons. A button only shows if its keys are set (see settings.py / README).
+SOCIAL_PROVIDERS = [
+    {'id': 'google', 'name': 'Google', 'icon': 'bi-google', 'env': 'GOOGLE_CLIENT_ID'},
+    {'id': 'github', 'name': 'GitHub', 'icon': 'bi-github', 'env': 'GITHUB_CLIENT_ID'},
+]
+
+
+def social_providers():
+    return [p for p in SOCIAL_PROVIDERS if os.environ.get(p['env'])]
 
 
 def style_fields(form):
@@ -94,6 +106,11 @@ class CampusLoginView(LoginView):
     authentication_form = StyledAuthenticationForm
     redirect_authenticated_user = True
 
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx['social_providers'] = social_providers()
+        return ctx
+
 
 def register(request):
     if request.user.is_authenticated:
@@ -106,7 +123,8 @@ def register(request):
         messages.success(request, 'Welcome to CampusConnect! Your account was created as a student.')
         return redirect('dashboard')
 
-    return render(request, 'campus/auth/register.html', {'form': form})
+    return render(request, 'campus/auth/register.html',
+                  {'form': form, 'social_providers': social_providers()})
 
 
 # ----------------------------------------------------------------------------

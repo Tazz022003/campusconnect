@@ -23,6 +23,8 @@
   <button type="submit" class="btn btn-psu w-100">Log in</button>
 </form>
 
+{% include 'campus/auth/_social.html' %}
+
 <p class="text-center small mt-3 mb-0">
   No account yet? <a href="{% url 'register' %}">Register</a>
 </p>

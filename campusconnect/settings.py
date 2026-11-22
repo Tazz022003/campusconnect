@@ -13,8 +13,15 @@ https://docs.djangoproject.com/en/6.1/ref/settings/
 from pathlib import Path
 import os
 
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+try:
+    from dotenv import load_dotenv
+    load_dotenv(BASE_DIR / '.env')   # sa PC mo lang: binabasa ang .env sa tabi ng manage.py
+except ImportError:
+    pass
 
 
 # Quick-start development settings - unsuitable for production
@@ -45,6 +52,12 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'django_filters',
+    'django.contrib.sites',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.google',
+    'allauth.socialaccount.providers.github',
     'campus',
 
 
@@ -64,6 +77,7 @@ MIDDLEWARE = [
     'campus.middleware.RequireLoginMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'allauth.account.middleware.AccountMiddleware',
 ]
 ROOT_URLCONF = 'campusconnect.urls'
 
@@ -149,3 +163,43 @@ SECURE_REFERRER_POLICY = 'strict-origin-when-cross-origin'
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'dashboard'
 LOGOUT_REDIRECT_URL = 'login'
+
+SITE_ID = 1
+
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
+]
+
+ACCOUNT_EMAIL_VERIFICATION = 'none'
+ACCOUNT_LOGIN_METHODS = {'username', 'email'}
+ACCOUNT_SIGNUP_FIELDS = ['email*', 'username*', 'password1*', 'password2*']
+ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'http' if DEBUG else 'https'
+
+SOCIALACCOUNT_AUTO_SIGNUP = True
+# kung may existing na account na kapareho ng email ng Google/GitHub, ikokonekta ito (hindi gagawa ng doble)
+SOCIALACCOUNT_EMAIL_AUTHENTICATION = True
+SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT = True
+
+SOCIALACCOUNT_PROVIDERS = {}
+
+if os.environ.get('GOOGLE_CLIENT_ID'):
+    SOCIALACCOUNT_PROVIDERS['google'] = {
+        'APP': {
+            'client_id': os.environ['GOOGLE_CLIENT_ID'],
+            'secret': os.environ.get('GOOGLE_CLIENT_SECRET', ''),
+            'key': '',
+        },
+        'SCOPE': ['profile', 'email'],
+        'AUTH_PARAMS': {'access_type': 'online'},
+    }
+
+if os.environ.get('GITHUB_CLIENT_ID'):
+    SOCIALACCOUNT_PROVIDERS['github'] = {
+        'APP': {
+            'client_id': os.environ['GITHUB_CLIENT_ID'],
+            'secret': os.environ.get('GITHUB_CLIENT_SECRET', ''),
+            'key': '',
+        },
+        'SCOPE': ['user:email'],
+    }

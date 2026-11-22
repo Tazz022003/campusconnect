@@ -26,4 +26,5 @@ urlpatterns = [
     path('users/', accounts.UserListView.as_view(), name='user_list'),
     path('users/<int:pk>/role/', accounts.UserRoleUpdateView.as_view(), name='user_role'),
     path('users/<int:pk>/delete/', accounts.UserDeleteView.as_view(), name='user_delete'),
+    path('accounts/', include('allauth.urls')),
 ] + crud_urlpatterns
