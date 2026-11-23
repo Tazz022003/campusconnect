@@ -77,6 +77,22 @@ body { background: var(--page-bg); }
 
 /* a bit more breathing room for fingers */
 @media (max-width: 991.98px) {
-  .sidebar .nav-link { padding: .7rem .8rem; }
+  .sidebar .nav-link { padding: .6rem .8rem; }
   .stat-card .fs-3 { font-size: 1.5rem !important; }
+}
+
+/* ---- logo ---- */
+.brand-logo { height: 36px; width: 36px; object-fit: contain; border-radius: 8px; }
+
+/* ---- phones: the menu must scroll all the way down (logout!) ---- */
+@media (max-width: 991.98px) {
+  .sidebar {
+    height: 100vh;
+    height: 100dvh;          /* the visible height, so the browser's bottom bar does not hide the end */
+    max-height: 100dvh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+  .sidebar-inner { padding-bottom: calc(1.5rem + env(safe-area-inset-bottom)) !important; }
+  .nav-section { margin-top: .6rem; }
 }

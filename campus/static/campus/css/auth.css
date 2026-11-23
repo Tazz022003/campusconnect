@@ -86,3 +86,13 @@
   justify-content: center;
   gap: .5rem;
 }
+
+/* logo above the name */
+.auth-logo-img {
+  display: block;
+  height: 64px;
+  width: 64px;
+  margin: 0 auto .5rem;
+  object-fit: contain;
+  border-radius: 14px;
+}
