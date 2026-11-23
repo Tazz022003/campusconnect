@@ -24,7 +24,13 @@ SOCIAL_PROVIDERS = [
 
 
 def social_providers():
-    return [p for p in SOCIAL_PROVIDERS if os.environ.get(p['env'])]
+    """Show a button when the keys are in the environment (.env) or added in the Django admin."""
+    try:
+        from allauth.socialaccount.models import SocialApp
+        in_admin = set(SocialApp.objects.values_list('provider', flat=True))
+    except Exception:   # tables not created yet, or allauth not installed
+        in_admin = set()
+    return [p for p in SOCIAL_PROVIDERS if os.environ.get(p['env']) or p['id'] in in_admin]
 
 
 def style_fields(form):
