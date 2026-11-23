@@ -125,7 +125,10 @@ def register(request):
     form = RegisterForm(request.POST or None)
     if request.method == 'POST' and form.is_valid():
         user = form.save()          # a Profile (role = student) is created automatically
-        login(request, user)
+        login(request, 
+              user,
+              backend='django.contrib.auth.backends.ModelBackend'
+              )
         messages.success(request, 'Welcome to CampusConnect! Your account was created as a student.')
         return redirect('dashboard')
 
