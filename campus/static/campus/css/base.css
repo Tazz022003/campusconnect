@@ -82,7 +82,7 @@ body { background: var(--page-bg); }
 }
 
 /* ---- logo ---- */
-.brand-logo { height: 36px; width: 36px; object-fit: contain; border-radius: 8px; }
+.brand-logo { height: 36px; width: 36px; object-fit: contain; border-radius: 50%; background: #fff; }
 
 /* ---- phones: the menu must scroll all the way down (logout!) ---- */
 @media (max-width: 991.98px) {
