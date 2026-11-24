@@ -29,7 +29,7 @@ CampusConnect is a web system where students can find school buildings, offices,
 
 | Walking Directions | Buildings (CRUD) |
 |---|---|
-| ![Walking route between two buildings](docs/image/direction.png) | ![Buildings list with edit and delete](docs/image/06_buildings.png) |
+| ![Walking route between two buildings](docs/image/direction.png) | ![Buildings list with edit and delete](docs/image/buildings.png) |
 
 | Add / Edit Form | Maintenance Reports |
 |---|---|
