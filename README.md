@@ -17,6 +17,28 @@ CampusConnect is a web system where students can find school buildings, offices,
 - REST API for all campus data
 - Responsive design that works on phones, tablets, and laptops
 
+## Screenshots
+
+| Login | Dashboard |
+|---|---|
+| ![Login page with email, Google, and GitHub sign-in](docs/image/login.png) | ![Dashboard with statistics, events, and announcements](docs/image/dashboard.png) |
+
+| Campus Map | Search |
+|---|---|
+| ![Interactive campus map with building markers](docs/image/campus_map.png) | ![Searching for a room or building](docs/image/search.png) |
+
+| Walking Directions | Buildings (CRUD) |
+|---|---|
+| ![Walking route between two buildings](docs/image/direction.png) | ![Buildings list with edit and delete](docs/image/06_buildings.png) |
+
+| Add / Edit Form | Maintenance Reports |
+|---|---|
+| ![Add and edit form](docs/image/07_add_form.png) | ![Maintenance reports with status](docs/image/maintenance_reports.png) |
+
+| User Roles | Mobile View |
+|---|---|
+| ![User management and roles](docs/image/role.png) | ![Phone layout](docs/image/mobile.png) |
+
 ## Tech Stack
 
 - **Backend:** Python, Django, Django REST Framework
@@ -35,8 +57,7 @@ CampusConnect is a web system where students can find school buildings, offices,
 
 ## Credits
 
-- CHARS GERAND P. ALMOCERA (https://github.com/Tazz022003)
-- ARIELJOHN CORDOVEZ (https://github.com/arieljohn34github.com)
-- DAVE LUMANOG
+- [Your Full Name](https://github.com/Tazz022003)
+- [Groupmate Full Name](https://github.com/their-username)
 
 Map data &copy; OpenStreetMap contributors. Walking routes by OSRM (FOSSGIS).
