@@ -33,7 +33,7 @@ CampusConnect is a web system where students can find school buildings, offices,
 
 | Add / Edit Form | Maintenance Reports |
 |---|---|
-| ![Add and edit form](docs/image/07_add_form.png) | ![Maintenance reports with status](docs/image/maintenance_reports.png) |
+| ![Add and edit form](docs/image/form.png) | ![Maintenance reports with status](docs/image/maintenance_reports.png) |
 
 | User Roles | Mobile View |
 |---|---|
