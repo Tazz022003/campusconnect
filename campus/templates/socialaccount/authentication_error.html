@@ -1,0 +1,13 @@
+{% extends 'campus/auth/auth_base.html' %}
+
+{% block title %}Sign in failed - CampusConnect{% endblock %}
+
+{% block content %}
+<div class="alert alert-danger">
+  We could not sign you in with that account.
+</div>
+<p class="small text-muted">
+  Please try again, or log in with your email and password instead.
+</p>
+<a class="btn btn-psu w-100" href="{% url 'login' %}">Back to log in</a>
+{% endblock %}

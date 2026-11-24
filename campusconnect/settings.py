@@ -19,7 +19,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 try:
     from dotenv import load_dotenv
-    load_dotenv(BASE_DIR / '.env')   # sa PC mo lang: binabasa ang .env sa tabi ng manage.py
+    load_dotenv(BASE_DIR / '.env')   
 except ImportError:
     pass
 
@@ -84,7 +84,7 @@ ROOT_URLCONF = 'campusconnect.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'campus' / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -139,13 +139,13 @@ USE_TZ = True
 
 
 # Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/6.1/howto/static-files/
+
 
 STATIC_URL = 'static/'
 
 
 # Email
-# https://docs.djangoproject.com/en/6.1/topics/email/#topic-email-configuration
+
 
 MAILERS = {
     'default': {
@@ -177,7 +177,7 @@ ACCOUNT_SIGNUP_FIELDS = ['email*', 'username*', 'password1*', 'password2*']
 ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'http' if DEBUG else 'https'
 
 SOCIALACCOUNT_AUTO_SIGNUP = True
-# kung may existing na account na kapareho ng email ng Google/GitHub, ikokonekta ito (hindi gagawa ng doble)
+
 SOCIALACCOUNT_EMAIL_AUTHENTICATION = True
 SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT = True
 
